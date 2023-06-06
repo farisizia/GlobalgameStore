@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:globalgamestore/Screens/Signup/components/validator.dart';
-import 'package:globalgamestore/profile/profile.dart';
+import 'package:globalgamestore/navigation/navigation.dart';
 
 import '../../../components/already_have_an_account_acheck.dart';
 import '../../../constants.dart';
@@ -20,24 +20,22 @@ class SignUpForm extends StatefulWidget {
 class _SignUpFormState extends State<SignUpForm> {
   @override
   Widget build(BuildContext context) {
-    final _nameTextController = TextEditingController();
-    final _emailTextController = TextEditingController();
-    final _passwordTextController = TextEditingController();
 
-    final _focusName = FocusNode();
-    final _focusEmail = FocusNode();
-    final _focusPassword = FocusNode();
-    final _formKey = GlobalKey<FormState>();
+
+    final focusName = FocusNode();
+    final focusEmail = FocusNode();
+    final focusPassword = FocusNode();
+    final formKey = GlobalKey<FormState>();
     return Form(
-      key: _formKey,
+      key: formKey,
       child: Column(
         children: [
           TextFormField(
             keyboardType: TextInputType.text,
             textInputAction: TextInputAction.next,
             cursorColor: kPrimaryColor,
-            controller: _nameTextController,
-            focusNode: _focusName,
+            controller: nameTextController,
+            focusNode: focusName,
             validator: (value) => Validator.validateName(name: value!),
             decoration: const InputDecoration(
               hintText: "Username",
@@ -51,8 +49,8 @@ class _SignUpFormState extends State<SignUpForm> {
           TextFormField(
             keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
-            controller: _emailTextController,
-            focusNode: _focusEmail,
+            controller: emailTextController,
+            focusNode: focusEmail,
             validator: (value) => Validator.validateEmail(
               email: value!,
             ),
@@ -71,8 +69,8 @@ class _SignUpFormState extends State<SignUpForm> {
               textInputAction: TextInputAction.done,
               obscureText: true,
               cursorColor: kPrimaryColor,
-              controller: _passwordTextController,
-              focusNode: _focusPassword,
+              controller: passwordTextController,
+              focusNode: focusPassword,
               validator: (value) => Validator.validatePassword(
                 password: value!,
               ),
@@ -88,21 +86,19 @@ class _SignUpFormState extends State<SignUpForm> {
           const SizedBox(height: defaultPadding / 2),
           ElevatedButton(
             onPressed: () async {
-              if (_formKey.currentState!.validate()) {
+              if (formKey.currentState!.validate()) {
                 User? user = await FireAuth.registerUsingEmailPassword(
-                  name: _nameTextController.text,
-                  email: _emailTextController.text,
-                  password: _passwordTextController.text,
+                  name: nameTextController.text,
+                  email: emailTextController.text,
+                  password: passwordTextController.text,
                 );
-                await user!.updateDisplayName(_nameTextController.text);
-                if (user != null) {
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                      builder: (context) => ProfileApp(),
-                    ),
-                    ModalRoute.withName('/'),
-                  );
-                }
+                await user!.updateDisplayName(nameTextController.text);
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                    builder: (context) => const NavAppBar(),
+                  ),
+                  ModalRoute.withName('/'),
+                );
               }
             },
             child: Text("Sign Up".toUpperCase()),

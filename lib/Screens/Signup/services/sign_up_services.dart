@@ -1,4 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+
+final nameTextController = TextEditingController();
+final emailTextController = TextEditingController();
+final passwordTextController = TextEditingController();
 
 class FireAuth {
   static Future<User?> registerUsingEmailPassword({
@@ -8,24 +14,30 @@ class FireAuth {
   }) async {
     FirebaseAuth auth = FirebaseAuth.instance;
     User? user;
+    final firestore = FirebaseFirestore.instance;
     try {
       UserCredential userCredential = await auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+      await firestore.collection('users').doc(userCredential.user!.uid).set({
+        'name': name,
+        'email': email,
+        'uid': userCredential.user!.uid,
+      });
       user = userCredential.user;
       await user!.updateDisplayName(name);
       await user.reload();
       user = auth.currentUser;
-      print('User registered successfully');
+      debugPrint('User registered successfully');
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
-        print('The password provided is too weak.');
+        debugPrint('The password provided is too weak.');
       } else if (e.code == 'email-already-in-use') {
-        print('The account already exists for that email.');
+        debugPrint('The account already exists for that email.');
       }
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
     return user;
   }
@@ -45,9 +57,9 @@ class FireAuth {
       user = userCredential.user;
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
-        print('No user found for that email.');
+        debugPrint('No user found for that email.');
       } else if (e.code == 'wrong-password') {
-        print('Wrong password provided.');
+        debugPrint('Wrong password provided.');
       }
     }
 
